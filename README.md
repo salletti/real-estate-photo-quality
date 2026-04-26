@@ -1,5 +1,13 @@
 # Photos Quality
 
+![Python](https://img.shields.io/badge/Python-3.12-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.115-green)
+![PyTorch](https://img.shields.io/badge/PyTorch-2.4-ee4c2c)
+![React](https://img.shields.io/badge/React-18-61dafb)
+![Docker](https://img.shields.io/badge/Docker-ready-2496ed)
+![Groq](https://img.shields.io/badge/Groq-LLaMA%203.3-f55036)
+![License](https://img.shields.io/badge/License-MIT-yellow)
+
 Computer Vision API for real estate photo quality assessment.
 
 A photo is uploaded, a ResNet18 model detects visual defects, a weighted scoring system computes a quality grade, and a Groq LLM generates human-readable improvement suggestions in French.
