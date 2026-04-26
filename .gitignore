@@ -1,0 +1,27 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+
+# macOS
+.DS_Store
+
+# Python env
+.venv/
+
+# Node dependencies
+node_modules/
+
+# Data & trained model
+backend/data/raw_images/
+backend/data/source_images/
+backend/data/generated/
+backend/data/images/
+backend/data/model.pth
+backend/data/dataset.csv
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# IDE
+.idea/
