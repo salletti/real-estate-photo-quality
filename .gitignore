@@ -12,12 +12,11 @@ __pycache__/
 # Node dependencies
 node_modules/
 
-# Data & trained model
+# Data & trained model (images et datasets exclus, model.pth suivi via Git LFS)
 backend/data/raw_images/
 backend/data/source_images/
 backend/data/generated/
 backend/data/images/
-backend/data/model.pth
 backend/data/dataset.csv
 
 # Claude Code local settings
