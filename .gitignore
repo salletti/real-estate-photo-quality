@@ -1,4 +1,6 @@
 .env
+.env.*
+!.env.example
 __pycache__/
 *.pyc
 *.pyo
@@ -11,6 +13,10 @@ __pycache__/
 
 # Node dependencies
 node_modules/
+frontend/dist/
+
+# Test caches
+.pytest_cache/
 
 # Data & trained model (images et datasets exclus, model.pth suivi via Git LFS)
 backend/data/raw_images/

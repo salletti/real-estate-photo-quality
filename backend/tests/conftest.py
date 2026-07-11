@@ -1,6 +1,7 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
-# Patch get_model before app.main is imported by test modules so that
-# ResNet18 ImageNet weights are never downloaded during test collection.
-_model_patch = patch("app.ml.models.model.get_model", return_value=MagicMock())
-_model_patch.start()
+# Keep app.main imports fast during API tests without masking get_model().
+_torch_load_patch = patch("torch.load", return_value={})
+_load_state_dict_patch = patch("torch.nn.Module.load_state_dict", return_value=None)
+_torch_load_patch.start()
+_load_state_dict_patch.start()

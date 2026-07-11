@@ -10,6 +10,7 @@ from app.ml.inference.predict import predict
 from app.ml.scoring.scoring import compute_score
 
 router = APIRouter()
+MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024
 
 
 @router.post("/predict", response_model=PredictResponse)
@@ -25,9 +26,13 @@ async def predict_endpoint(
     model.eval()
 
     try:
+        image_data = await image.read(MAX_UPLOAD_SIZE_BYTES + 1)
+        if len(image_data) > MAX_UPLOAD_SIZE_BYTES:
+            raise HTTPException(status_code=413, detail="Image is too large")
+
         ext = Path(image.filename).suffix.lower() if image.filename else ".jpg"
         with tempfile.NamedTemporaryFile(suffix=ext, delete=False) as tmp:
-            tmp.write(await image.read())
+            tmp.write(image_data)
             tmp_path = Path(tmp.name)
 
         issues = predict(str(tmp_path), model)

@@ -5,6 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 from PIL import Image
 
+from app.api.predict import MAX_UPLOAD_SIZE_BYTES
 from app.main import app
 
 STUB_ISSUES = {
@@ -63,3 +64,17 @@ def test_predict_non_image_file_returns_400(client):
         files={"image": ("doc.txt", io.BytesIO(b"not an image"), "text/plain")},
     )
     assert response.status_code == 400
+
+
+def test_predict_oversized_image_returns_413(client):
+    response = client.post(
+        "/predict",
+        files={
+            "image": (
+                "large.jpg",
+                io.BytesIO(b"x" * (MAX_UPLOAD_SIZE_BYTES + 1)),
+                "image/jpeg",
+            )
+        },
+    )
+    assert response.status_code == 413

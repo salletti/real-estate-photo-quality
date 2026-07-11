@@ -26,14 +26,14 @@ def _build_prompt(active_issues: list[str]) -> str:
 
 
 def generate_human_suggestions(issues: dict[str, int]) -> str:
-    api_key = os.getenv("GROQ_API_KEY")
-    if not api_key:
-        raise ValueError("GROQ_API_KEY environment variable is not set")
-
     active_issues = [label for label, active in issues.items() if active and label in ISSUE_LABELS_FR]
 
     if not active_issues:
         return "Cette photo ne présente aucun défaut détecté."
+
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        raise ValueError("GROQ_API_KEY environment variable is not set")
 
     client = OpenAI(api_key=api_key, base_url=GROQ_BASE_URL)
 

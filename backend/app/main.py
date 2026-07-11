@@ -10,11 +10,20 @@ from app.ml.models.model import get_model
 
 MODEL_PATH = os.getenv("MODEL_PATH", "data/model.pth")
 
+
+def get_allowed_origins() -> list[str]:
+    raw_origins = os.getenv("ALLOWED_ORIGINS")
+    if not raw_origins:
+        return ["*"]
+    origins = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
+    return origins or ["*"]
+
+
 app = FastAPI(title="Photos Quality", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.getenv("ALLOWED_ORIGINS", "*").split(","),
+    allow_origins=get_allowed_origins(),
     allow_methods=["POST", "GET"],
     allow_headers=["*"],
 )

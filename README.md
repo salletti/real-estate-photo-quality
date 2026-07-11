@@ -20,21 +20,23 @@ A photo is uploaded, a ResNet18 model detects visual defects, a weighted scoring
 2. [Project Structure](#2-project-structure)
 3. [Installation](#3-installation)
 4. [Configuration](#4-configuration)
-5. [Running the API](#5-running-the-api)
-6. [Running Tests](#6-running-tests)
-7. [Training the Model](#7-training-the-model)
-8. [Dataset Pipeline](#8-dataset-pipeline)
-9. [ML Pipeline — Architecture & Design Choices](#9-ml-pipeline--architecture--design-choices)
+5. [Model Modes](#model-modes)
+6. [Running the API](#5-running-the-api)
+7. [Production Deployment](#production-deployment)
+8. [Running Tests](#6-running-tests)
+9. [Training the Model](#7-training-the-model)
+10. [Dataset Pipeline](#8-dataset-pipeline)
+11. [ML Pipeline — Architecture & Design Choices](#9-ml-pipeline--architecture--design-choices)
    - [Model Architecture](#91-model-architecture)
    - [Multi-Label Classification](#92-multi-label-classification)
    - [Transform Pipeline](#93-transform-pipeline)
    - [Training Loop](#94-training-loop)
    - [Inference Pipeline](#95-inference-pipeline)
    - [Scoring System](#96-scoring-system)
-10. [LLM Integration (Groq)](#10-llm-integration-groq)
-11. [API Reference](#11-api-reference)
-12. [Limitations & Known Issues](#12-limitations--known-issues)
-13. [Future Improvements](#13-future-improvements)
+12. [LLM Integration (Groq)](#10-llm-integration-groq)
+13. [API Reference](#11-api-reference)
+14. [Limitations & Known Issues](#12-limitations--known-issues)
+15. [Future Improvements](#13-future-improvements)
 
 ---
 
@@ -194,8 +196,31 @@ cp .env.example .env
 | Variable | Required | Description |
 |---|---|---|
 | `GROQ_API_KEY` | Yes | API key from [console.groq.com](https://console.groq.com) |
+| `MODEL_MODE` | No | `inference` by default. Use `training` only for local transfer learning. |
+| `MODEL_PATH` | No | Path to trained weights. Production uses `data/model.pth`. |
 
 The application has **no database**. The trained model weights are loaded from disk at startup. All temporary files (uploaded images) are written to a temp directory and deleted after each request.
+
+---
+
+## Model Modes
+
+`MODEL_MODE` controls only the initial ResNet18 weights used when creating the model.
+
+Local training uses ImageNet transfer learning:
+
+```bash
+MODEL_MODE=training python -m app.ml.training.train
+```
+
+Production uses inference mode:
+
+```text
+MODEL_MODE=inference
+MODEL_PATH=data/model.pth
+```
+
+When `MODEL_MODE` is absent, the default is `inference`. La production ne télécharge jamais de poids ImageNet et effectue uniquement de l'inférence à partir du modèle déjà entraîné.
 
 ---
 
@@ -223,6 +248,52 @@ curl http://localhost:8000/health
 ```
 http://localhost:8000/docs
 ```
+
+---
+
+## Production Deployment
+
+Production is intended to run behind Coolify / Traefik at:
+
+```text
+https://photo-quality.stefanoalletti.com
+```
+
+The production stack is defined in `docker-compose.prod.yml`. The frontend is the only service intended to be routed publicly; the backend only exposes port `8000` to the private Docker network and has no host `ports` mapping.
+
+Required environment variables must be configured in Coolify, not committed and not provided through a production `.env` file:
+
+```text
+GROQ_API_KEY
+MODEL_MODE=inference
+MODEL_PATH=data/model.pth
+```
+
+Build and run:
+
+```bash
+docker compose -f docker-compose.prod.yml build
+docker compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml ps
+docker compose -f docker-compose.prod.yml logs -f
+```
+
+Frontend:
+
+```text
+http://localhost
+```
+
+Through the frontend reverse proxy:
+
+```text
+GET /api/health
+POST /api/predict
+```
+
+`/api/predict` is proxied to the backend as `/predict`, and `/api/health` is proxied as `/health`.
+
+Le modèle est entraîné localement et la production effectue uniquement de l’inférence. The backend loads the trained weights from `backend/data/model.pth`, available in the container as `data/model.pth`; production must not train a model, modify `model.pth`, or download TorchVision/ImageNet weights at startup.
 
 ---
 

@@ -8,7 +8,7 @@ ENV PYTHONUNBUFFERED=1
 COPY requirements.txt .
 
 RUN pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu \
-    torch==2.4.1+cpu torchvision==0.19.1+cpu
+    torch==2.4.1 torchvision==0.19.1
 
 RUN pip install --no-cache-dir -r requirements.txt
 
